@@ -1,0 +1,380 @@
+"use client";
+
+import {
+  forwardRef,
+  useEffect,
+  useImperativeHandle,
+  useRef,
+} from "react";
+import gsap from "gsap";
+
+const photos = [
+  // FOTO KAMU TETAP SAMA
+  {
+    src: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=480&q=85",
+    alt: "Portrait outdoors",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=480&q=85",
+    alt: "Portrait in the afternoon",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=480&q=85",
+    alt: "Black and white portrait",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=480&q=85",
+    alt: "Portrait with a gentle smile",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1502823403499-6ccfcf4fb453?auto=format&fit=crop&w=480&q=85",
+    alt: "Portrait in golden light",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=480&q=85",
+    alt: "Portrait in a studio",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=480&q=85",
+    alt: "Portrait in a white shirt",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1524250502761-1ac6f2e30d43?auto=format&fit=crop&w=480&q=85",
+    alt: "Portrait with red flowers",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=480&q=85",
+    alt: "Portrait looking away",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=480&q=85",
+    alt: "Portrait beside a wall",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=480&q=85",
+    alt: "Close portrait in soft light",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=480&q=85",
+    alt: "Portrait with a calm expression",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1485893086445-ed75865251e0?auto=format&fit=crop&w=480&q=85",
+    alt: "Portrait with dark hair",
+  },
+  {
+    src: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=480&q=85",
+    alt: "Portrait against blue",
+  },
+];
+
+const GallerySphere = forwardRef(function GallerySphere(props, ref) {
+  const stageRef = useRef(null);
+  const sphereRef = useRef(null);
+  const hintRef = useRef(null);
+  const hasInteracted = useRef(false);
+
+  // Untuk menyimpan object motion yang dibuat di dalam useEffect
+  const motionRef = useRef(null);
+
+  // Method yang bisa dipanggil dari Home
+  useImperativeHandle(ref, () => ({
+    rotateByScroll(delta) {
+      if (!motionRef.current) return;
+
+      motionRef.current.targetY += delta * 180;
+    },
+  }));
+
+  useEffect(() => {
+    const stage = stageRef.current;
+    const sphere = sphereRef.current;
+
+    const items = [...sphere.querySelectorAll(".photo")];
+
+    const motion = {
+      x: -8,
+      y: -18,
+      targetX: -8,
+      targetY: -18,
+      velocityX: 0,
+      velocityY: 0,
+    };
+
+    // Simpan motion supaya bisa diakses rotateByScroll()
+    motionRef.current = motion;
+
+    let radius = 320;
+    let dragging = false;
+    let pointerId = null;
+    let lastX = 0;
+    let lastY = 0;
+
+    const setPhotoPositions = () => {
+      radius = Math.min(
+        window.innerWidth < 700 ? 160 : 330,
+        window.innerWidth * (window.innerWidth < 700 ? 0.43 : 0.29),
+      );
+
+      items.forEach((item, index) => {
+        const phi = Math.acos(
+          1 - (2 * (index + 0.5)) / items.length
+        );
+
+        const theta =
+          Math.PI * (1 + Math.sqrt(5)) * index;
+
+        const x =
+          radius *
+          Math.sin(phi) *
+          Math.cos(theta);
+
+        const y =
+          radius *
+          Math.cos(phi);
+
+        const z =
+          radius *
+          Math.sin(phi) *
+          Math.sin(theta);
+
+        item.dataset.x = x;
+        item.dataset.y = y;
+        item.dataset.z = z;
+        item.dataset.size = 0.88 + (index % 4) * 0.06;
+      });
+    };
+
+    const render = () => {
+      // Smooth rotation
+      motion.x +=
+        (motion.targetX - motion.x) * 0.075;
+
+      motion.y +=
+        (motion.targetY - motion.y) * 0.075;
+
+      // Momentum dari drag
+      motion.targetX += motion.velocityX;
+      motion.targetY += motion.velocityY;
+
+      motion.velocityX *= 0.91;
+      motion.velocityY *= 0.91;
+
+      // AUTO ROTATE
+      if (!dragging) {
+        motion.targetY += 0.035;
+      }
+
+      sphere.style.transform = `
+        rotateX(${motion.x}deg)
+        rotateY(${motion.y}deg)
+      `;
+
+      items.forEach((item) => {
+        const z = Number(item.dataset.z);
+
+        const depth =
+          (z + radius) / (radius * 2);
+
+        const scale =
+          (0.6 + depth * 0.2) *
+          Number(item.dataset.size);
+
+        item.style.zIndex =
+          String(Math.round(depth * 100));
+
+        item.style.filter =
+          `blur(${(1 - depth) * 0.8}px)`;
+
+        item.style.transform = `
+          translate3d(
+            ${item.dataset.x}px,
+            ${item.dataset.y}px,
+            ${z}px
+          )
+          rotateY(${-motion.y}deg)
+          rotateX(${-motion.x}deg)
+          scale(${scale})
+        `;
+      });
+    };
+
+    // =========================
+    // DRAG
+    // =========================
+
+    const onPointerDown = (event) => {
+      event.preventDefault();
+
+      dragging = true;
+
+      pointerId = event.pointerId;
+
+      lastX = event.clientX;
+      lastY = event.clientY;
+
+      motion.velocityX = 0;
+      motion.velocityY = 0;
+
+      stage.setPointerCapture(pointerId);
+
+      stage.classList.add("is-dragging");
+
+      if (!hasInteracted.current) {
+        hasInteracted.current = true;
+
+        gsap.to(hintRef.current, {
+          autoAlpha: 0,
+          y: 8,
+          duration: 0.35,
+          ease: "power2.out",
+        });
+      }
+    };
+
+    const onPointerMove = (event) => {
+      if (
+        !dragging ||
+        event.pointerId !== pointerId
+      ) {
+        return;
+      }
+
+      const deltaX =
+        event.clientX - lastX;
+
+      const deltaY =
+        event.clientY - lastY;
+
+      lastX = event.clientX;
+      lastY = event.clientY;
+
+      motion.targetY += deltaX * 0.22;
+      motion.targetX -= deltaY * 0.18;
+
+      motion.velocityY =
+        deltaX * 0.055;
+
+      motion.velocityX =
+        -deltaY * 0.045;
+    };
+
+    const onPointerUp = (event) => {
+      if (event.pointerId !== pointerId) {
+        return;
+      }
+
+      dragging = false;
+
+      stage.releasePointerCapture(pointerId);
+
+      stage.classList.remove("is-dragging");
+    };
+
+    setPhotoPositions();
+
+    // Initial animation
+    gsap.fromTo(
+      items,
+      {
+        autoAlpha: 0,
+      },
+      {
+        autoAlpha: 1,
+        duration: 1.5,
+        stagger: 0.045,
+        ease: "power3.out",
+        delay: 0.35,
+      },
+    );
+
+    gsap.ticker.add(render);
+
+    stage.addEventListener(
+      "pointerdown",
+      onPointerDown
+    );
+
+    stage.addEventListener(
+      "pointermove",
+      onPointerMove
+    );
+
+    stage.addEventListener(
+      "pointerup",
+      onPointerUp
+    );
+
+    stage.addEventListener(
+      "pointercancel",
+      onPointerUp
+    );
+
+    window.addEventListener(
+      "resize",
+      setPhotoPositions
+    );
+
+    return () => {
+      gsap.ticker.remove(render);
+
+      gsap.killTweensOf(items);
+      gsap.killTweensOf(hintRef.current);
+
+      stage.removeEventListener(
+        "pointerdown",
+        onPointerDown
+      );
+
+      stage.removeEventListener(
+        "pointermove",
+        onPointerMove
+      );
+
+      stage.removeEventListener(
+        "pointerup",
+        onPointerUp
+      );
+
+      stage.removeEventListener(
+        "pointercancel",
+        onPointerUp
+      );
+
+      window.removeEventListener(
+        "resize",
+        setPhotoPositions
+      );
+
+      motionRef.current = null;
+    };
+  }, []);
+
+  return (
+    <div
+      ref={stageRef}
+      className="sphere-container"
+      aria-label="Interactive birthday photo sphere"
+    >
+      <div
+        ref={sphereRef}
+        className="sphere"
+      >
+        {photos.map((photo, index) => (
+          <figure
+            className="photo"
+            key={`${photo.src}-${index}`}
+          >
+            <img
+              src={photo.src}
+              alt={photo.alt}
+              draggable="false"
+            />
+          </figure>
+        ))}
+      </div>
+    </div>
+  );
+});
+
+export default GallerySphere;
