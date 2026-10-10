@@ -1,14 +1,16 @@
 "use client";
 
-import GallerySphere from "./components/GallerySphere";
-import Navbar from "./components/Navbar";
-import Paraf from "./components/Paraf";
-import ParticlesBackground from "./components/ParticleBackground";
+import GallerySphere from "@/components/GallerySphere";
+import Navbar from "@/components/Navbar";
+import Paraf from "@/components/Paraf";
+import ParticlesBackground from "@/components/ParticleBackground";
 import { useCallback, useRef } from "react";
 import gsap from "gsap";
 
-import useScrollPin from "./hooks/useScrollpint";
-import useScrollFadeIn from "./hooks/useScrollFade";
+import useScrollPin from "@/hooks/useScrollpint";
+import useScrollFadeIn from "@/hooks/useScrollFade";
+
+import CakeScene from "@/components/CakeScene";
 
 export default function Home() {
   const flashRef = useRef(null);
@@ -172,11 +174,11 @@ export default function Home() {
    
         <div>Scroll More!</div>
       </div>
-      <section className="h-screen bg-white"></section>
+      <section className="h-screen bg-linear-to-b from-white via-gray-500 to-black"></section>
 
-      <section className="h-screen bg-white flex flex-col gap-5 items-center justify-center">
-        <h1 className="text-4xl text-yellow-900">Ready?</h1>
-        <button className="bg-yellow-900 text-white text-xl px-6 py-2 rounded-full hover:bg-amber-950 hover:cursor-pointer ease-in-out transition-all">Let's Go!</button>
+      <section className="h-screen flex bg-black flex-col gap-5 items-center justify-center">
+       {/* kue muncul disini */}
+       <CakeScene></CakeScene>
       </section>
 
       <ParticlesBackground />

@@ -1,4 +1,4 @@
-import SmoothScroll from "./components/Smoothscroll";
+import SmoothScroll from "../components/Smoothscroll";
 import "./globals.css";
 
 export const metadata = {
