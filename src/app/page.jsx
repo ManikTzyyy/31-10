@@ -35,7 +35,7 @@ export default function Home() {
     "Because today is about you.",
   ];
 
-  const third = useRef(null)
+  const third = useRef(null);
 
   // =========================
   // ROTASI SPHERE
@@ -112,7 +112,6 @@ export default function Home() {
     gsap.set(flash, {
       opacity: flashProgress,
     });
-
   }, []);
 
   const handleAfterPinUpdate = useCallback((self) => {
@@ -120,7 +119,7 @@ export default function Home() {
     if (!flash) return;
 
     gsap.set(flash, {
-      display: "block",
+      display: "flex",
       opacity: 1 - self.progress,
     });
   }, []);
@@ -164,13 +163,20 @@ export default function Home() {
 
       <div
         ref={flashRef}
-        className="fixed inset-0 z-40 bg-white pointer-events-none opacity-0"
-      />
-      <section className="h-[50vh] bg-white"></section>
+        className="fixed inset-0 z-40 bg-white pointer-events-none opacity-0 flex flex-col gap-2 justify-center items-center">
+        <div className="scroll-downs">
+          <div className="mousey">
+            <div className="scroller"></div>
+          </div>
+        </div>
+   
+        <div>Scroll More!</div>
+      </div>
+      <section className="h-screen bg-white"></section>
 
-
-      <section  className="h-screen bg-white flex items-center justify-center">
-        <h1 className="text-4xl text-yellow-900">Hello lol</h1>
+      <section className="h-screen bg-white flex flex-col gap-5 items-center justify-center">
+        <h1 className="text-4xl text-yellow-900">Ready?</h1>
+        <button className="bg-yellow-900 text-white text-xl px-6 py-2 rounded-full hover:bg-amber-950 hover:cursor-pointer ease-in-out transition-all">Let's Go!</button>
       </section>
 
       <ParticlesBackground />
