@@ -11,15 +11,18 @@ export default function useScrollPin(
   end = "+=1000",
   onScroll = null,
   onUpdate = null,
-  onTransition = null
+  onTransition = null,
+  onAfterPinUpdate = null,
+  onAfterPinLeave = null
 ) {
   useEffect(() => {
     if (!ref.current) return;
 
     let lastProgress = 0;
+    let afterPinTrigger;
 
     const ctx = gsap.context(() => {
-      ScrollTrigger.create({
+      const pinTrigger = ScrollTrigger.create({
         trigger: ref.current,
 
         start: "top top",
@@ -60,8 +63,19 @@ export default function useScrollPin(
           onTransition?.(self);
         },
       });
+
+      afterPinTrigger = ScrollTrigger.create({
+        trigger: ref.current,
+        start: () => pinTrigger.end + window.innerHeight,
+        end: () => pinTrigger.end + window.innerHeight * 2,
+        onUpdate: (self) => onAfterPinUpdate?.(self),
+        onLeave: (self) => onAfterPinLeave?.(self),
+      });
     }, ref);
 
-    return () => ctx.revert();
-  }, [ref, end, onScroll, onUpdate, onTransition]);
+    return () => {
+      afterPinTrigger?.kill();
+      ctx.revert();
+    };
+  }, [ref, end, onScroll, onUpdate, onTransition, onAfterPinUpdate, onAfterPinLeave]);
 }

@@ -9,7 +9,6 @@ import gsap from "gsap";
 
 import useScrollPin from "./hooks/useScrollpint";
 import useScrollFadeIn from "./hooks/useScrollFade";
-import useFadeinTransition from "./hooks/useFadeinTransition";
 
 export default function Home() {
   const flashRef = useRef(null);
@@ -35,6 +34,8 @@ export default function Home() {
     "A little more special.",
     "Because today is about you.",
   ];
+
+  const third = useRef(null)
 
   // =========================
   // ROTASI SPHERE
@@ -111,6 +112,22 @@ export default function Home() {
     gsap.set(flash, {
       opacity: flashProgress,
     });
+
+  }, []);
+
+  const handleAfterPinUpdate = useCallback((self) => {
+    const flash = flashRef.current;
+    if (!flash) return;
+
+    gsap.set(flash, {
+      display: "block",
+      opacity: 1 - self.progress,
+    });
+  }, []);
+
+  const handleAfterPinLeave = useCallback(() => {
+    const flash = flashRef.current;
+    if (flash) gsap.set(flash, { display: "none" });
   }, []);
 
   useScrollPin(
@@ -119,9 +136,12 @@ export default function Home() {
     handleSphereScroll,
     handleTextScroll,
     handleTransition,
+    handleAfterPinUpdate,
+    handleAfterPinLeave,
   );
 
-  useScrollFadeIn(sphereSectionRef, "50");
+  useScrollFadeIn(sphereSectionRef);
+  useScrollFadeIn(third);
 
   return (
     <div className="text-yellow-900">
@@ -132,8 +152,7 @@ export default function Home() {
       {/* SPHERE SECTION */}
       <div
         ref={sphereSectionRef}
-        className="h-screen flex justify-center items-center relative overflow-x-hidden px-2"
-      >
+        className="h-screen flex justify-center items-center relative overflow-x-hidden px-2">
         <GallerySphere ref={sphereRef} />
 
         {/* TEXT */}
@@ -145,10 +164,12 @@ export default function Home() {
 
       <div
         ref={flashRef}
-        className="fixed inset-0 z-50 bg-white pointer-events-none opacity-0"
+        className="fixed inset-0 z-40 bg-white pointer-events-none opacity-0"
       />
+      <section className="h-[50vh] bg-white"></section>
 
-      <section className="h-screen bg-white flex items-center justify-center">
+
+      <section  className="h-screen bg-white flex items-center justify-center">
         <h1 className="text-4xl text-yellow-900">Hello lol</h1>
       </section>
 
