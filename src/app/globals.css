@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #FFF6DE;
+  --background: #fff6de;
 }
 
 @theme inline {
@@ -9,7 +9,6 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
-
 
 @font-face {
   font-family: "General Sans";
@@ -40,7 +39,6 @@ body {
   height: 100%;
   z-index: -1;
 }
-
 
 .sphere-container {
   cursor: grab;
@@ -87,15 +85,55 @@ body {
   width: 100%;
 }
 
-
-
 @media (max-width: 700px) {
-
   .photo {
     height: clamp(108px, 30vw, 142px);
     width: clamp(72px, 22vw, 100px);
   }
-
 }
 
-*{border: red solid 1px;}
+/* .scroll-downs {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  margin: auto;
+
+  width: 34px;
+  height: 55px;
+} */
+.mousey {
+  width: 3px;
+  padding: 10px 15px;
+  height: 35px;
+  border: 2px solid #000000;
+  border-radius: 25px;
+  opacity: 0.75;
+  box-sizing: content-box;
+}
+.scroller {
+  width: 3px;
+  height: 10px;
+  border-radius: 25%;
+  background-color: #000000;
+  animation-name: scroll;
+  animation-duration: 2.2s;
+  animation-timing-function: cubic-bezier(0.15, 0.41, 0.69, 0.94);
+  animation-iteration-count: infinite;
+}
+@keyframes scroll {
+  0% {
+    opacity: 0;
+  }
+  10% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(15px);
+    opacity: 0;
+  }
+}
+
+/* *{border: red solid 1px;} */

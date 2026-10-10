@@ -9,7 +9,6 @@ import gsap from "gsap";
 
 import useScrollPin from "./hooks/useScrollpint";
 import useScrollFadeIn from "./hooks/useScrollFade";
-import useFadeinTransition from "./hooks/useFadeinTransition";
 
 export default function Home() {
   const flashRef = useRef(null);
@@ -35,6 +34,8 @@ export default function Home() {
     "A little more special.",
     "Because today is about you.",
   ];
+
+  const third = useRef(null);
 
   // =========================
   // ROTASI SPHERE
@@ -113,15 +114,33 @@ export default function Home() {
     });
   }, []);
 
+  const handleAfterPinUpdate = useCallback((self) => {
+    const flash = flashRef.current;
+    if (!flash) return;
+
+    gsap.set(flash, {
+      display: "flex",
+      opacity: 1 - self.progress,
+    });
+  }, []);
+
+  const handleAfterPinLeave = useCallback(() => {
+    const flash = flashRef.current;
+    if (flash) gsap.set(flash, { display: "none" });
+  }, []);
+
   useScrollPin(
     sphereSectionRef,
     "+=1000",
     handleSphereScroll,
     handleTextScroll,
     handleTransition,
+    handleAfterPinUpdate,
+    handleAfterPinLeave,
   );
 
-  useScrollFadeIn(sphereSectionRef, "50");
+  useScrollFadeIn(sphereSectionRef);
+  useScrollFadeIn(third);
 
   return (
     <div className="text-yellow-900">
@@ -132,8 +151,7 @@ export default function Home() {
       {/* SPHERE SECTION */}
       <div
         ref={sphereSectionRef}
-        className="h-screen flex justify-center items-center relative overflow-x-hidden px-2"
-      >
+        className="h-screen flex justify-center items-center relative overflow-x-hidden px-2">
         <GallerySphere ref={sphereRef} />
 
         {/* TEXT */}
@@ -145,11 +163,20 @@ export default function Home() {
 
       <div
         ref={flashRef}
-        className="fixed inset-0 z-50 bg-white pointer-events-none opacity-0"
-      />
+        className="fixed inset-0 z-40 bg-white pointer-events-none opacity-0 flex flex-col gap-2 justify-center items-center">
+        <div className="scroll-downs">
+          <div className="mousey">
+            <div className="scroller"></div>
+          </div>
+        </div>
+   
+        <div>Scroll More!</div>
+      </div>
+      <section className="h-screen bg-white"></section>
 
-      <section className="h-screen bg-white flex items-center justify-center">
-        <h1 className="text-4xl text-yellow-900">Hello lol</h1>
+      <section className="h-screen bg-white flex flex-col gap-5 items-center justify-center">
+        <h1 className="text-4xl text-yellow-900">Ready?</h1>
+        <button className="bg-yellow-900 text-white text-xl px-6 py-2 rounded-full hover:bg-amber-950 hover:cursor-pointer ease-in-out transition-all">Let's Go!</button>
       </section>
 
       <ParticlesBackground />

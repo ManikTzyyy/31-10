@@ -6,47 +6,31 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 gsap.registerPlugin(ScrollTrigger);
 
-export default function useFadeinTransition(
-  flashRef,
-  triggerRef,
-  startProgress = 0.8
-) {
+export default function useScrollFadeIn(triggerRef) {
   useEffect(() => {
-    if (!flashRef.current || !triggerRef.current) return;
+    const trigger = triggerRef.current;
+
+    if (!trigger) return;
 
     const ctx = gsap.context(() => {
-      gsap.set(flashRef.current, {
-        opacity: 0,
-      });
+      const targets = trigger.children.length ? trigger.children : trigger;
 
-      ScrollTrigger.create({
-        trigger: triggerRef.current,
-
-        start: "top top",
-        end: "+=1000",
-
-        onUpdate: (self) => {
-          const progress = self.progress;
-
-          if (progress < startProgress) {
-            gsap.set(flashRef.current, {
-              opacity: 0,
-            });
-
-            return;
-          }
-
-          // Ubah progress 0.8 - 1 menjadi 0 - 1
-          const flashProgress =
-            (progress - startProgress) / (1 - startProgress);
-
-          gsap.set(flashRef.current, {
-            opacity: flashProgress,
-          });
+      gsap.fromTo(
+        targets,
+        { autoAlpha: 0 },
+        {
+          autoAlpha: 1,
+          duration: 0.8,
+          ease: "power2.out",
+          scrollTrigger: {
+            trigger,
+            start: "top 85%",
+            toggleActions: "play none none reverse",
+          },
         },
-      });
-    }, triggerRef);
+      );
+    }, trigger);
 
     return () => ctx.revert();
-  }, [flashRef, triggerRef, startProgress]);
+  }, [triggerRef]);
 }
