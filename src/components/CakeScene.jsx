@@ -8,6 +8,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import gsap from "gsap";
 import { Fireworks } from "fireworks-js";
 import { createFlame } from "./Flame";
+import GallerySphere from "./GallerySphere";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -17,9 +18,13 @@ export default function CakeScene() {
   const fireworksContainerRef = useRef(null);
   const fireworksInstanceRef = useRef(null);
   const audioRef = useRef(null); // <-- Ref untuk elemen audio HTML
+  const wishTimeoutRef = useRef(null);
   const [isLit, setIsLit] = useState(false);
+  const [showWishStep, setShowWishStep] = useState(false);
+  const [hasBlown, setHasBlown] = useState(false);
 
   const isLitRef = useRef(false);
+  const hasBlownRef = useRef(false);
   const resetSceneRef = useRef(() => {});
 
   const lightsRef = useRef({
@@ -38,7 +43,19 @@ export default function CakeScene() {
     if (isLitRef.current) return;
 
     isLitRef.current = true;
+    hasBlownRef.current = false;
     setIsLit(true);
+    setHasBlown(false);
+    setShowWishStep(false);
+
+    if (wishTimeoutRef.current) {
+      clearTimeout(wishTimeoutRef.current);
+      wishTimeoutRef.current = null;
+    }
+
+    wishTimeoutRef.current = setTimeout(() => {
+      setShowWishStep(true);
+    }, 5000);
 
     // Putar musik dari awal menggunakan elemen audio HTML
     if (audioRef.current) {
@@ -46,42 +63,6 @@ export default function CakeScene() {
       audioRef.current.play().catch((err) => {
         console.log("Gagal memutar audio:", err);
       });
-    }
-
-    // Hentikan dan bersihkan instance kembang api lama
-    if (fireworksInstanceRef.current) {
-      fireworksInstanceRef.current.stop();
-      fireworksInstanceRef.current = null;
-    }
-    if (fireworksContainerRef.current) {
-      fireworksContainerRef.current.innerHTML = "";
-    }
-
-    if (fireworksContainerRef.current) {
-      const fireworks = new Fireworks(fireworksContainerRef.current, {
-        autoresize: true,
-        opacity: 0.5,
-        acceleration: 1.02,
-        friction: 0.94,
-        gravity: 1.0,
-        particles: 50,
-        trace: 3,
-        explosion: 10,
-        intensity: 5,
-        flickering: 50,
-        lineStyle: 'round',
-        sound: {
-          enabled: true,
-          files: [
-            'https://fireworks.js.org/sounds/explosion0.mp3',
-            'https://fireworks.js.org/sounds/explosion1.mp3',
-            'https://fireworks.js.org/sounds/explosion2.mp3',
-          ],
-        },
-      });
-      
-      fireworks.start();
-      fireworksInstanceRef.current = fireworks;
     }
 
     const {
@@ -141,9 +122,97 @@ export default function CakeScene() {
     }
   };
 
+  const handleBlow = () => {
+    if (!isLitRef.current || hasBlownRef.current) return;
+
+    hasBlownRef.current = true;
+    setHasBlown(true);
+    setShowWishStep(false);
+    if (lightsRef.current.controls) {
+      lightsRef.current.controls.enabled = true;
+    }
+
+    lightsRef.current.rotationTween?.kill();
+    lightsRef.current.rotationTween = null;
+
+    if (fireworksInstanceRef.current) {
+      fireworksInstanceRef.current.stop();
+      fireworksInstanceRef.current = null;
+    }
+
+    if (fireworksContainerRef.current) {
+      fireworksContainerRef.current.innerHTML = "";
+    }
+
+    if (fireworksContainerRef.current) {
+      const fireworks = new Fireworks(fireworksContainerRef.current, {
+        autoresize: true,
+        opacity: 0.5,
+        acceleration: 1.02,
+        friction: 0.94,
+        gravity: 1.0,
+        particles: 50,
+        trace: 3,
+        explosion: 10,
+        intensity: 5,
+        flickering: 50,
+        lineStyle: "round",
+        sound: {
+          enabled: true,
+          files: [
+            "https://fireworks.js.org/sounds/explosion0.mp3",
+            "https://fireworks.js.org/sounds/explosion1.mp3",
+            "https://fireworks.js.org/sounds/explosion2.mp3",
+          ],
+        },
+      });
+
+      fireworks.start();
+      fireworksInstanceRef.current = fireworks;
+    }
+
+    const { ambient, directional, candle, flameMesh } = lightsRef.current;
+
+    const tl = gsap.timeline();
+
+    if (ambient) {
+      tl.to(ambient, { intensity: 0.9, duration: 1 }, 0);
+    }
+
+    if (directional) {
+      tl.to(directional, { intensity: 0.7, duration: 1 }, 0);
+    }
+
+    if (candle) {
+      tl.to(candle, { intensity: 0, duration: 1 }, 0);
+    }
+
+    if (flameMesh) {
+      tl.to(
+        flameMesh.scale,
+        {
+          x: 0,
+          y: 0,
+          z: 0,
+          duration: 1,
+          ease: "power2.out",
+        },
+        0,
+      );
+    }
+  };
+
   const handleReset = () => {
     isLitRef.current = false;
+    hasBlownRef.current = false;
     setIsLit(false);
+    setHasBlown(false);
+    setShowWishStep(false);
+
+    if (wishTimeoutRef.current) {
+      clearTimeout(wishTimeoutRef.current);
+      wishTimeoutRef.current = null;
+    }
 
     // Matikan musik dan kembalikan ke awal saat reset
     if (audioRef.current) {
@@ -183,10 +252,10 @@ export default function CakeScene() {
 
     const renderer = new THREE.WebGLRenderer({
       alpha: true,
-      antialias: true,
+      antialias: window.devicePixelRatio < 2,
     });
 
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -285,12 +354,18 @@ export default function CakeScene() {
             end: "center center",
             scrub: 1,
             onUpdate: (self) => {
-              if (self.progress >= 0.99 && isLitRef.current) {
+              if (
+                self.progress >= 0.99 &&
+                isLitRef.current &&
+                !hasBlownRef.current
+              ) {
                 controls.enabled = true;
               }
             },
             onLeaveBack: () => {
-              controls.enabled = false;
+              if (!hasBlownRef.current) {
+                controls.enabled = false;
+              }
             },
           },
         });
@@ -305,16 +380,27 @@ export default function CakeScene() {
     const flameWorldPosition = new THREE.Vector3();
 
     let animationId;
+    let isVisible = false;
 
     function animate() {
+      if (!isVisible) return;
+
       animationId = requestAnimationFrame(animate);
 
       const time = clock.getElapsedTime();
 
       flame.update(time);
 
-      if (isLitRef.current && candleLight.intensity > 0) {
-        candleLight.intensity = 3 + Math.sin(time * 9) * 0.3;
+      if (
+        isLitRef.current &&
+        !hasBlownRef.current &&
+        candleLight.intensity > 0
+      ) {
+        const baseIntensity = 3;
+        const flickerAmount = 0.3;
+
+        candleLight.intensity =
+          baseIntensity + Math.sin(time * 9) * flickerAmount;
       }
 
       flame.mesh.getWorldPosition(flameWorldPosition);
@@ -324,7 +410,21 @@ export default function CakeScene() {
       renderer.render(scene, camera);
     }
 
-    animate();
+    const visibilityObserver = new IntersectionObserver(
+      ([entry]) => {
+        isVisible = entry.isIntersecting;
+
+        if (isVisible) {
+          clock.start();
+          animate();
+        } else {
+          cancelAnimationFrame(animationId);
+        }
+      },
+      { threshold: 0 },
+    );
+
+    visibilityObserver.observe(section);
 
     resetSceneRef.current = () => {
       const { rotationTween, lightTimeline } = lightsRef.current;
@@ -372,10 +472,16 @@ export default function CakeScene() {
       disposed = true;
 
       cancelAnimationFrame(animationId);
+      visibilityObserver.disconnect();
       resizeObserver.disconnect();
 
       if (audioRef.current) {
         audioRef.current.pause();
+      }
+
+      if (wishTimeoutRef.current) {
+        clearTimeout(wishTimeoutRef.current);
+        wishTimeoutRef.current = null;
       }
 
       if (fireworksInstanceRef.current) {
@@ -423,14 +529,16 @@ export default function CakeScene() {
   return (
     <section
       ref={sectionRef}
-      className="relative flex h-screen w-full items-center justify-center overflow-hidden bg-black"
+      className={`relative flex h-screen w-full items-center justify-center overflow-hidden transition-colors duration-1000 ${
+        hasBlown ? "bg-white" : "bg-black"
+      }`}
     >
       {/* Elemen audio HTML bawaan untuk menghindari error cache browser */}
       <audio ref={audioRef} src="/hbd.mp3" preload="auto" loop />
 
-      <div 
-        ref={fireworksContainerRef} 
-        className="absolute inset-0 pointer-events-none z-0" 
+      <div
+        ref={fireworksContainerRef}
+        className="absolute inset-0 pointer-events-none z-0"
       />
 
       <div
@@ -438,18 +546,43 @@ export default function CakeScene() {
         className={`absolute inset-0 z-10 ${!isLit ? "pointer-events-none" : ""}`}
       />
 
+      {isLit && showWishStep && !hasBlown && (
+        <div className="wish-message absolute left-1/2 top-40 z-20  whitespace-nowrap text-2xl text-center text-white">
+          Make a wish
+        </div>
+      )}
+
+      {hasBlown && (
+        <div className="floating-gallery-reveal absolute  top-60 left-1/2 z-0">
+          <GallerySphere/>
+        </div>
+      )}
+
       <div className="absolute bottom-10 z-20 flex items-center gap-3">
-        {!isLit ? (
+        {!isLit && (
           <button
             onClick={handleLightUp}
             className="cursor-pointer rounded-full bg-white px-8 py-2 text-xl text-yellow-900 transition-transform hover:scale-105 active:scale-95"
           >
             Light Up!
           </button>
-        ) : (
+        )}
+
+        {isLit && showWishStep && !hasBlown && (
+          <>
+            <button
+              onClick={handleBlow}
+              className="cursor-pointer rounded-full bg-yellow-300 px-8 py-2 text-xl text-yellow-950 transition-transform hover:scale-105 active:scale-95"
+            >
+              Blow
+            </button>
+          </>
+        )}
+
+        {isLit && hasBlown && (
           <button
             onClick={handleReset}
-            className="cursor-pointer rounded-full border border-white/30 bg-white/10 px-8 py-2 text-xl text-white backdrop-blur-md transition-transform hover:scale-105 active:scale-95"
+            className="cursor-pointer rounded-full border border-black/30 bg-black/5 px-8 py-2 text-xl text-black backdrop-blur-md transition-transform hover:scale-105 active:scale-95"
           >
             Reset
           </button>

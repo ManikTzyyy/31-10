@@ -8,7 +8,7 @@ import {
 } from "react";
 import gsap from "gsap";
 
-const photos = [
+export const galleryPhotos = [
   // FOTO KAMU TETAP SAMA
   {
     src: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=480&q=85",
@@ -360,7 +360,7 @@ const GallerySphere = forwardRef(function GallerySphere(props, ref) {
         ref={sphereRef}
         className="sphere"
       >
-        {photos.map((photo, index) => (
+        {galleryPhotos.map((photo, index) => (
           <figure
             className="photo"
             key={`${photo.src}-${index}`}
@@ -369,6 +369,8 @@ const GallerySphere = forwardRef(function GallerySphere(props, ref) {
               src={photo.src}
               alt={photo.alt}
               draggable="false"
+              loading="lazy"
+              decoding="async"
             />
           </figure>
         ))}

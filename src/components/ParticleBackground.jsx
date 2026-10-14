@@ -4,13 +4,18 @@ import { useEffect } from "react";
 
 export default function ParticlesBackground() {
   useEffect(() => {
+    let particles;
+    let disposed = false;
+
     const loadParticles = async () => {
       await import("particles.js");
 
-      window.particlesJS("particles-js", {
+      if (disposed) return;
+
+      particles = window.particlesJS("particles-js", {
         particles: {
           number: {
-            value: 160,
+            value: 80,
             density: {
               enable: true,
               value_area: 800,
@@ -120,6 +125,20 @@ export default function ParticlesBackground() {
     };
 
     loadParticles();
+
+    return () => {
+      disposed = true;
+
+      const instance =
+        particles?.pJS ??
+        window.pJSDom?.find(
+          ({ pJS }) => pJS?.canvas?.el?.id === "particles-js",
+        )?.pJS;
+
+      if (instance) {
+        instance.fn.vendors.destroypJS();
+      }
+    };
   }, []);
 
   return <div id="particles-js" />;

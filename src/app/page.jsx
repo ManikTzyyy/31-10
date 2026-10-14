@@ -3,16 +3,25 @@
 import GallerySphere from "@/components/GallerySphere";
 import Navbar from "@/components/Navbar";
 import Paraf from "@/components/Paraf";
-import ParticlesBackground from "@/components/ParticleBackground";
-import { useCallback, useRef } from "react";
+import LoadingScreen from "@/components/LoadingScreen";
+import dynamic from "next/dynamic";
+import { useCallback, useRef, useState } from "react";
 import gsap from "gsap";
 
 import useScrollPin from "@/hooks/useScrollpint";
 import useScrollFadeIn from "@/hooks/useScrollFade";
 
-import CakeScene from "@/components/CakeScene";
+const CakeScene = dynamic(() => import("@/components/CakeScene"), {
+  ssr: false,
+});
+
+const ParticlesBackground = dynamic(
+  () => import("@/components/ParticleBackground"),
+  { ssr: false },
+);
 
 export default function Home() {
+  const [isLoaded, setIsLoaded] = useState(false);
   const flashRef = useRef(null);
   // Section yang di-pin
   const sphereSectionRef = useRef(null);
@@ -38,6 +47,9 @@ export default function Home() {
   ];
 
   const third = useRef(null);
+  const handleLoadingComplete = useCallback(() => {
+    setIsLoaded(true);
+  }, []);
 
   // =========================
   // ROTASI SPHERE
@@ -145,7 +157,9 @@ export default function Home() {
   useScrollFadeIn(third);
 
   return (
-    <div className="text-yellow-900">
+    <>
+      {!isLoaded && <LoadingScreen onComplete={handleLoadingComplete} />}
+      <div className="text-yellow-900">
       <Navbar />
 
       <Paraf />
@@ -182,6 +196,7 @@ export default function Home() {
       </section>
 
       <ParticlesBackground />
-    </div>
+      </div>
+    </>
   );
 }
