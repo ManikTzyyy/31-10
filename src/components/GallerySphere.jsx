@@ -9,62 +9,57 @@ import {
 import gsap from "gsap";
 
 export const galleryPhotos = [
-  // FOTO KAMU TETAP SAMA
   {
-    src: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=480&q=85",
-    alt: "Portrait outdoors",
+    src: "/a.JPG",
+    alt: "Gallery photo A",
   },
   {
-    src: "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=480&q=85",
-    alt: "Portrait in the afternoon",
+    src: "/b.PNG",
+    alt: "Gallery photo B",
   },
   {
-    src: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=480&q=85",
-    alt: "Black and white portrait",
+    src: "/c.JPG",
+    alt: "Gallery photo C",
   },
   {
-    src: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=480&q=85",
-    alt: "Portrait with a gentle smile",
+    src: "/d.JPG",
+    alt: "Gallery photo D",
   },
   {
-    src: "https://images.unsplash.com/photo-1502823403499-6ccfcf4fb453?auto=format&fit=crop&w=480&q=85",
-    alt: "Portrait in golden light",
+    src: "/e.JPG",
+    alt: "Gallery photo E",
   },
   {
-    src: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=480&q=85",
-    alt: "Portrait in a studio",
+    src: "/f.JPG",
+    alt: "Gallery photo F",
   },
   {
-    src: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=480&q=85",
-    alt: "Portrait in a white shirt",
+    src: "/g.JPG",
+    alt: "Gallery photo G",
   },
   {
-    src: "https://images.unsplash.com/photo-1524250502761-1ac6f2e30d43?auto=format&fit=crop&w=480&q=85",
-    alt: "Portrait with red flowers",
+    src: "/h.JPG",
+    alt: "Gallery photo H",
   },
   {
-    src: "https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?auto=format&fit=crop&w=480&q=85",
-    alt: "Portrait looking away",
+    src: "/i.JPG",
+    alt: "Gallery photo I",
   },
   {
-    src: "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=480&q=85",
-    alt: "Portrait beside a wall",
+    src: "/j.JPG",
+    alt: "Gallery photo J",
   },
   {
-    src: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=480&q=85",
-    alt: "Close portrait in soft light",
+    src: "/k.JPG",
+    alt: "Gallery photo K",
   },
   {
-    src: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=480&q=85",
-    alt: "Portrait with a calm expression",
+    src: "/l.JPG",
+    alt: "Gallery photo L",
   },
   {
-    src: "https://images.unsplash.com/photo-1485893086445-ed75865251e0?auto=format&fit=crop&w=480&q=85",
-    alt: "Portrait with dark hair",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=480&q=85",
-    alt: "Portrait against blue",
+    src: "/m.JPG",
+    alt: "Gallery photo M",
   },
 ];
 
