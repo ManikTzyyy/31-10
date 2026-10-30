@@ -1,0 +1,202 @@
+"use client";
+
+import GallerySphere from "@/components/GallerySphere";
+import Navbar from "@/components/Navbar";
+import Paraf from "@/components/Paraf";
+import LoadingScreen from "@/components/LoadingScreen";
+import dynamic from "next/dynamic";
+import { useCallback, useRef, useState } from "react";
+import gsap from "gsap";
+
+import useScrollPin from "@/hooks/useScrollpint";
+import useScrollFadeIn from "@/hooks/useScrollFade";
+
+const CakeScene = dynamic(() => import("@/components/CakeScene"), {
+  ssr: false,
+});
+
+const ParticlesBackground = dynamic(
+  () => import("@/components/ParticleBackground"),
+  { ssr: false },
+);
+
+export default function Home() {
+  const [isLoaded, setIsLoaded] = useState(false);
+  const flashRef = useRef(null);
+  // Section yang di-pin
+  const sphereSectionRef = useRef(null);
+
+  // Kontrol GallerySphere
+  const sphereRef = useRef(null);
+
+  // Kontrol text
+  const textRef = useRef(null);
+  const currentTextIndex = useRef(0);
+
+  const texts = [
+    "A day that quietly marks another chapter.",
+    "A little warmer.",
+    "A little brighter.",
+    "A little softer.",
+    "A little sweeter.",
+    "A little more beautiful.",
+    "A little more meaningful.",
+    "A little more magical.",
+    "A little more special.",
+    "Because today is about you.",
+  ];
+
+  const third = useRef(null);
+  const handleLoadingComplete = useCallback(() => {
+    setIsLoaded(true);
+  }, []);
+
+  // =========================
+  // ROTASI SPHERE
+  // =========================
+
+  const handleSphereScroll = useCallback((delta) => {
+    sphereRef.current?.rotateByScroll(delta);
+  }, []);
+
+  // =========================
+  // TEXT SCROLL
+  // =========================
+
+  const handleTextScroll = useCallback((self) => {
+    const progress = self.progress;
+
+    const textProgress = Math.min(progress / 0.9, 1);
+
+    const index = Math.min(
+      texts.length - 1,
+      Math.floor(textProgress * texts.length),
+    );
+
+    if (index === currentTextIndex.current) {
+      return;
+    }
+
+    currentTextIndex.current = index;
+
+    const text = textRef.current;
+
+    if (!text) return;
+
+    // Ganti text
+    text.textContent = texts[index];
+
+    // Animasi fade up
+    gsap.killTweensOf(text);
+
+    gsap.fromTo(
+      text,
+      {
+        opacity: 0,
+        y: 40,
+      },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.6,
+        ease: "power3.out",
+      },
+    );
+  }, []);
+
+  const handleTransition = useCallback((self) => {
+    const progress = self.progress;
+
+    const flash = flashRef.current;
+
+    if (!flash) return;
+
+    // Sebelum 90% → tidak ada flash
+    if (progress < 0.9) {
+      gsap.set(flash, {
+        opacity: 0,
+      });
+
+      return;
+    }
+
+    // 90% → 100%
+    const flashProgress = (progress - 0.9) / 0.1;
+
+    gsap.set(flash, {
+      opacity: flashProgress,
+    });
+  }, []);
+
+  const handleAfterPinUpdate = useCallback((self) => {
+    const flash = flashRef.current;
+    if (!flash) return;
+
+    gsap.set(flash, {
+      display: "flex",
+      opacity: 1 - self.progress,
+    });
+  }, []);
+
+  const handleAfterPinLeave = useCallback(() => {
+    const flash = flashRef.current;
+    if (flash) gsap.set(flash, { display: "none" });
+  }, []);
+
+  useScrollPin(
+    sphereSectionRef,
+    "+=1000",
+    handleSphereScroll,
+    handleTextScroll,
+    handleTransition,
+    handleAfterPinUpdate,
+    handleAfterPinLeave,
+  );
+
+  useScrollFadeIn(sphereSectionRef);
+  useScrollFadeIn(third);
+
+  return (
+    <>
+      {!isLoaded && <LoadingScreen onComplete={handleLoadingComplete} />}
+      <div className="text-yellow-900">
+      <Navbar />
+
+      <Paraf />
+
+      {/* SPHERE SECTION */}
+      <div
+        ref={sphereSectionRef}
+        className="h-screen flex justify-center items-center relative overflow-x-hidden px-2">
+        <GallerySphere ref={sphereRef} />
+
+        {/* TEXT */}
+
+        <p ref={textRef} className="w-60 ">
+          A day that quietly marks another chapter.
+        </p>
+      </div>
+
+      <div
+        ref={flashRef}
+        className="fixed inset-0 z-40 bg-white pointer-events-none opacity-0 flex flex-col gap-2 justify-center items-center">
+        <div className="scroll-downs">
+          <div className="mousey">
+            <div className="scroller"></div>
+          </div>
+        </div>
+   
+        <div>Scroll More!</div>
+      </div>
+      <section className="h-screen bg-linear-to-b from-white via-gray-500 to-black"></section>
+
+      <section className="h-screen flex bg-black flex-col gap-5 items-center justify-center">
+       {/* kue muncul disini */}
+       <CakeScene></CakeScene>
+      </section>
+
+      <ParticlesBackground />
+      </div>
+    </>
+  );
+}
